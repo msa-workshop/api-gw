@@ -1,2 +1,26 @@
 server:
   port: 11080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: post-service
+          uri: http://localhost:8080
+          predicates:
+            - Path=/api/posts/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 1
+                redis-rate-limiter.burstCapacity: 2
+                redis-rate-limiter.requestedTokens: 1
+            - LocalResponseCache=10s,10MB
+        - id: user-service
+          uri: http://localhost:9080
+          predicates:
+            - Path=/api/users/**
+        - id: image-service
+          uri: http://localhost:6080
+          predicates:
+            - Path=/api/images/**
